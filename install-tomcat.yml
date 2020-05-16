@@ -1,0 +1,23 @@
+- name: This playbook will install, configure and deploy a web page into tomcat serveer
+  hosts: ubuntu 
+  vars:
+    provisioner_tool: Docker
+    cfg_mgnt_tool: Ansible
+  tasks:
+     - name: Install apache tomcat in Ubuntu node
+       apt: name=apache2 state=latest update_cache=yes
+
+     - name: Create our custom web root folder
+       file: path="/var/html" state=directory mode=0777 
+
+     - name: Grant permission to new web root folder
+       copy: src=apache2.conf dest=/etc/apache2/apache2.conf
+
+     - name: Replace 000-default.conf with updated web root folder onto ubuntu node
+       copy: src=000-default.conf dest=/etc/apache2/sites-available/000-default.conf mode=0777
+
+     - name: Deploy our custom web page 
+       template: src=index.html dest=/var/html/index.html
+
+     - name: Restart tomcat
+       command: service apache2 restart
